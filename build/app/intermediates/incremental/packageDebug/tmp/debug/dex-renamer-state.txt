@@ -1,0 +1,4 @@
+#Mon Jan 27 21:54:24 GMT 2020
+base.0=/home/renan/Área de Trabalho/Hd Externo/buscador_de_gifs/build/app/intermediates/transforms/dexMerger/debug/0
+path.0=classes.dex
+renamed.0=classes.dex

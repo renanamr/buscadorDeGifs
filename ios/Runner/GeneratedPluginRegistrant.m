@@ -3,7 +3,12 @@
 //
 
 #import "GeneratedPluginRegistrant.h"
-#import <share/SharePlugin.h>
+
+#if __has_include(<share/FLTSharePlugin.h>)
+#import <share/FLTSharePlugin.h>
+#else
+@import share;
+#endif
 
 @implementation GeneratedPluginRegistrant
 

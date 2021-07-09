@@ -1,15 +1,16 @@
-import 'dart:convert' show json;
-import 'package:http/http.dart' as http;
+import 'package:buscador_de_gifs/services/repositories/get_gifs_repository_interface.dart';
+import 'package:buscador_de_gifs/services/repositories/get_gifs_repository.dart';
 import 'package:rxdart/rxdart.dart';
 
 class HomeBloc{
 
   String search;
   int offset = 0;
-  final urlBase ="https://api.giphy.com/v1/gifs";
+  IGetGifsRepository _repositoryGetGifs;
 
-  HomeBloc(){
-    getGifs();
+  HomeBloc({IGetGifsRepository repositoryGetGifs}){
+    _repositoryGetGifs = repositoryGetGifs ?? GetGifsRepositoy();
+    _getGifs();
   }
 
   BehaviorSubject<Map> _gifsStream = BehaviorSubject();
@@ -17,20 +18,17 @@ class HomeBloc{
   Stream<Map> get listGifs => _gifsStream.stream;
 
 
-  Future<Map> getGifs() async {
-    _gifsStream..sink.add({});//modo de espera
-    http.Response response;
+  Future<Map> _getGifs() async {
+    _gifsStream.sink.add({});//modo de espera
+    Map<String, dynamic> map;
 
     if (search == null)
-      response = await http.get(urlBase+"/trending?api_key=BGrSLJVE8IyRjGCIYPW5QlJ6e3A3afEJ&limit=20&rating=G");
+      map = await _repositoryGetGifs.getGifsTrending();
     else
-      response = await http.get(
-          "$urlBase/search?api_key=BGrSLJVE8IyRjGCIYPW5QlJ6e3A3afEJ&q=$search&limit=19&offset=$offset&rating=G&lang=en");
+      map = await _repositoryGetGifs.getSearchGifs(search: search, offset: offset);
 
 
-    final map = json.decode(response.body);//Mostrar informações
     _gifsStream.sink.add(map);
-
     return map;
   }
 
@@ -46,12 +44,12 @@ class HomeBloc{
   void searchGif(String texto) {
     search = texto;
     offset = 0;
-    getGifs();
+    _getGifs();
   }
 
   void searchMoreGif() {
     offset += 19;
-    getGifs();
+    _getGifs();
   }
 
 

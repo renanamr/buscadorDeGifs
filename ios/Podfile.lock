@@ -1,6 +1,6 @@
 PODS:
   - Flutter (1.0.0)
-  - share (0.0.1):
+  - share (0.5.2):
     - Flutter
 
 DEPENDENCIES:
@@ -15,7 +15,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
-  share: 0b2c3e82132f5888bccca3351c504d0003b3b410
+  share: bae0a282aab4483288913fc4dc0b935d4b491f2e
 
 PODFILE CHECKSUM: 8e679eca47255a8ca8067c4c67aab20e64cb974d
 

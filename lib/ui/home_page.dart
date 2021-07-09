@@ -1,13 +1,9 @@
+import 'package:buscador_de_gifs/bloc/home_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:share/share.dart';
-import 'dart:convert';
 import 'package:transparent_image/transparent_image.dart';
 
 import 'gif_page.dart';
-
-const urlTop =
-    "https://api.giphy.com/v1/gifs/trending?api_key=BGrSLJVE8IyRjGCIYPW5QlJ6e3A3afEJ&limit=20&rating=G";
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.title}) : super(key: key);
@@ -19,18 +15,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String _search;
-  int _offset = 0;
 
-  Future<Map> getGifs() async {
-    http.Response response;
-    if (_search == null)
-      response = await http.get(urlTop);
-    else
-      response = await http.get(
-          "https://api.giphy.com/v1/gifs/search?api_key=BGrSLJVE8IyRjGCIYPW5QlJ6e3A3afEJ&q=$_search&limit=19&offset=$_offset&rating=G&lang=en");
+  HomeBloc _bloc;
 
-    return json.decode(response.body);
+  @override
+  void initState() {
+    _bloc = HomeBloc();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _bloc.dispose();
+    super.dispose();
   }
 
   @override
@@ -54,105 +51,75 @@ class _HomePageState extends State<HomePage> {
                     border: OutlineInputBorder()),
                 style: TextStyle(color: Colors.white, fontSize: 18),
                 textAlign: TextAlign.center,
-                onSubmitted: (texto) {
-                  setState(() {
-                    _search = texto;
-                    _offset = 0;
-                  });
-                },
+                onSubmitted: _bloc.searchGif,
               ),
             ),
+
             Expanded(
-                child: FutureBuilder(
-                    future: getGifs(),
-                    builder: (context, snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.none:
-                          return Container(
-                            width: 20.0,
-                            height: 20.0,
-                            child: CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                              strokeWidth: 5,
-                            ),
-                          );
-                          break;
-                        case ConnectionState.waiting:
-                          return Container(
-                            width: 20.0,
-                            height: 20.0,
-                            child: CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                              strokeWidth: 5.0,
-                            ),
-                          );
-                          break;
-                        default:
-                          if (snapshot.hasError)
-                            return Container();
-                          else
-                            return _createGifTable(context, snapshot);
-                      }
-                    }))
+                child: StreamBuilder<Map>(
+                  initialData: {},
+                  stream: _bloc.listGifs,
+                  builder: (context, snapshot) {
+
+                    if(snapshot.data.isEmpty)
+                      return Center(
+                        child: CircularProgressIndicator(
+                          valueColor:
+                          AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 5.0,
+                        ),
+                      );
+                    else
+                      return _createGifTable(context, snapshot.data);
+                  },
+                )
+            )
           ],
         ));
   }
 
-  int _getCount(List data) {
-    if (_search == null || _search.isEmpty) {
-      return data.length;
-    } else {
-      return data.length + 1;
-    }
-  }
-
-  Widget _createGifTable(BuildContext context, AsyncSnapshot snapshot) {
+  Widget _createGifTable(BuildContext context, Map snapshot) {
     return GridView.builder(
         padding: EdgeInsets.all(10),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10),
-        itemCount: _getCount(snapshot.data["data"]),
+            crossAxisCount: 2,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10
+        ),
+        itemCount: _bloc.getCount(snapshot["data"]),
+
         itemBuilder: (context, index) {
-          if (_search == null || index < snapshot.data["data"].length)
-            return GestureDetector(
+          if (_bloc.search == null || index < snapshot["data"].length)
+            return InkWell(
               child: FadeInImage.memoryNetwork(
                   placeholder: kTransparentImage,
-                  image: snapshot.data["data"][index]["images"]["fixed_height"]["url"],
+                  image: snapshot["data"][index]["images"]["fixed_height"]["url"],
                     fit: BoxFit.cover,
                     height: 300.0,
                   ),
               onLongPress: (){
-                Share.share(snapshot.data["data"][index]["images"]["fixed_height"]["url"]);
+                Share.share(snapshot["data"][index]["images"]["fixed_height"]["url"]);
               },
               onTap: (){
                 Navigator.push(context, MaterialPageRoute(builder: (context){
-                  return GifPage(snapshot.data["data"][index]);
+                  return GifPage(snapshot["data"][index]);
                 }));
               },
             );
           else
             return GestureDetector(
+              onTap: _bloc.searchMoreGif,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Icon(
-                    Icons.add,
-                    size: 70,
-                    color: Colors.white,
-                  ),
+                  Icon(Icons.add, size: 70, color: Colors.white,),
+
                   Text(
                     "Carregar Mais",
                     style: TextStyle(color: Colors.white, fontSize: 22),
                   )
                 ],
               ),
-              onTap: (){
-                setState(() {
-                  _offset += 19;
-                });
-              },
             );
         });
   }

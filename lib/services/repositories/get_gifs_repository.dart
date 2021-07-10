@@ -3,11 +3,11 @@ import 'package:buscador_de_gifs/services/data/get_gifs_interface.dart';
 import 'package:buscador_de_gifs/services/repositories/get_gifs_repository_interface.dart';
 
 
-class GetGifsRepositoy extends IGetGifsRepository{
+class GetGifsRepository extends IGetGifsRepository{
 
   IGetGifs _getGifs;
 
-  GetGifsRepositoy({IGetGifs getGifs}){
+  GetGifsRepository({IGetGifs getGifs}){
     _getGifs = getGifs ?? GetGifsImpl();
   }
 

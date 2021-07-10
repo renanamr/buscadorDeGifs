@@ -9,7 +9,7 @@ class HomeBloc{
   IGetGifsRepository _repositoryGetGifs;
 
   HomeBloc({IGetGifsRepository repositoryGetGifs}){
-    _repositoryGetGifs = repositoryGetGifs ?? GetGifsRepositoy();
+    _repositoryGetGifs = repositoryGetGifs ?? GetGifsRepository();
     _getGifs();
   }
 

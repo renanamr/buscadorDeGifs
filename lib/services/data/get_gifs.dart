@@ -24,7 +24,7 @@ class GetGifsImpl extends IGetGifs{
       );
       return response.data;
     }catch(e){
-      rethrow;
+      throw Exception(e);
     }
   }
 
@@ -45,7 +45,7 @@ class GetGifsImpl extends IGetGifs{
 
       return response.data;
     }catch(e){
-      rethrow;
+      throw Exception(e);
     }
   }
 
